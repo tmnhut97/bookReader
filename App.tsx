@@ -5,114 +5,82 @@
  * @format
  */
 
-import React from 'react';
-import type {PropsWithChildren} from 'react';
+import React, {useEffect, useState} from 'react';
+import {StatusBar, useColorScheme} from 'react-native';
+import {Colors} from 'react-native/Libraries/NewAppScreen';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
+  DarkTheme,
+  DefaultTheme,
+  NavigationContainer,
+} from '@react-navigation/native';
+import HomeScreen from './android/app/src/screens/home/homes';
+import BookScreen from './android/app/src/screens/book/book';
+import Splash from './android/app/src/screens/splash';
+import {EventRegister} from 'react-native-event-listeners';
+import theme from './theme/theme';
+import themeContext from './theme/themeContext';
+import BookmarkScreen from './android/app/src/screens/home/bookMark';
+import FavouriteScreen from './android/app/src/screens/home/favourite';
+import AboutScreen from './android/app/src/screens/about/about';
+import TermsScreen from './android/app/src/screens/privacy/privacy-terms';
+import ContactScreen from './android/app/src/screens/contact/contact';
+import Chapter from './android/app/src/screens/home/Chapter';
+import Section from './android/app/src/screens/home/Section';
+import Highlight from './android/app/src/screens/home/Highlight';
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+const Stack = createNativeStackNavigator();
 
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
-
-function Section({children, title}: SectionProps): React.JSX.Element {
+const App = () => {
   const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-}
-
-function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
+    flex: 1,
   };
+  const [darkMode, setDarkMode] = useState(false);
+  useEffect(() => {
+    const listener = EventRegister.addEventListener('ChangeTheme', data => {
+      setDarkMode(data);
+      console.log('data', data);
+    });
+    return () => {
+      EventRegister.removeAllListeners(listener);
+    };
+  }, [darkMode]);
 
   return (
-    <SafeAreaView style={backgroundStyle}>
+    <>
       <StatusBar
         barStyle={isDarkMode ? 'light-content' : 'dark-content'}
         backgroundColor={backgroundStyle.backgroundColor}
       />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
-  );
-}
+      <themeContext.Provider
+        value={darkMode === true ? theme.dark : theme.light}>
+        <NavigationContainer
+          theme={darkMode === true ? DarkTheme : DefaultTheme}>
+          <Stack.Navigator
+            id="stack-nav"
+            initialRouteName="Splash"
+            screenOptions={{headerShown: false}}>
+            <Stack.Screen name="Splash" component={Splash} />
+            <Stack.Screen name="Home" component={HomeScreen} />
+            <Stack.Screen name="Book" component={BookScreen} />
+            <Stack.Screen name="BookmarkScreen" component={BookmarkScreen} />
+            <Stack.Screen name="FavouriteScreen" component={FavouriteScreen} />
+            <Stack.Screen name="about" component={AboutScreen} />
+            <Stack.Screen name="privacy" component={TermsScreen} />
+            <Stack.Screen name="contact" component={ContactScreen} />
 
-const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-});
+            <Stack.Screen name="Chapter" component={Chapter} />
+            <Stack.Screen name="Section" component={Section} />
+            <Stack.Screen name="Highlight" component={Highlight} />
+
+
+          </Stack.Navigator>
+        </NavigationContainer>
+      </themeContext.Provider>
+    </>
+  );
+};
 
 export default App;
